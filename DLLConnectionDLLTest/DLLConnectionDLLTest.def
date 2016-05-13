@@ -1,0 +1,5 @@
+LIBRARY "DLLConnectionDLLTest"
+EXPORTS
+	myAdd @1
+	fctHoldingArray @2
+	myGetSQL @3
