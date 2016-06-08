@@ -21,6 +21,53 @@ extern "C"
 
 
 
+	void __stdcall DisplayStringByVal(LPCSTR pszString)
+	{
+		//pszString is a pointer to a string
+		MessageBox(NULL, pszString, "Display String ByVal",
+			MB_OK | MB_ICONINFORMATION);
+	}
+
+	void __stdcall DisplayStringByRef(LPCSTR* ppszString)
+	{
+		//ppszSting is a pointer to a pointer to a string
+		MessageBox(NULL, *ppszString, "Display String ByRef",
+			MB_OK | MB_ICONINFORMATION);
+		
+	}
+
+	void __stdcall FillString(LPSTR pszString, LONG cSize)
+	{
+		// Create a temp buffer with our string
+		char buffer[] = "Hello from the C DLL!";
+
+		// Copy our temp string to pszString
+		// but check the size to make sure we have a buffer
+		// big enough to hold the entire string.
+		if (cSize > strlen(buffer))
+			strcpy(pszString, buffer);
+	}
+
+	int __stdcall InStrRev(LPCSTR pszString, short iChar)
+	{
+		// This function is similar to Visual Basic's InStr function
+		// except that it searches for the given ASCII character from
+		// right to left, returning the character position of the
+		// last occurrence (rather than the first) of the character
+		// in the string.
+		const char* pszTmp;
+		int nRet = 0;
+
+		// Scan for iChar in pszString backwards
+		pszTmp = strrchr(pszString, (int)iChar);
+		if (pszTmp != NULL)
+			nRet = pszTmp - pszString + 1;
+
+		return nRet;
+	}
+
+
+
 
 	int _stdcall myAdd(int a, int b)
 	{
@@ -78,8 +125,8 @@ extern "C"
 					retcode = SQLDriverConnect( // SQL_NULL_HDBC
 						hdbc,
 						desktopHandle,
-						(SQLCHAR*)"DRIVER={SQL Server};SERVER=(local);Database=NexantSafetyStaging;UID=foo;PWD=f00Welcome1",
-						_countof("DRIVER={SQL Server};SERVER=(local);Database=NexantSafetyStaging;UID=foo;PWD=f00Welcome1"),
+						(SQLCHAR*)"DRIVER={SQL Server};SERVER=SACSQL03;Database=Safety;UID=SafetyUsr;PWD=SafetyPwd1",
+						_countof("DRIVER={SQL Server};SERVER=SACSQL03;Database=Safety;UID=SafetyUsr;PWD=SafetyPwd1"),
 						OutConnStr,
 						255,
 						&OutConnStrLen,
@@ -112,7 +159,7 @@ extern "C"
 						//fred = SQLExecDirect(hstmt, (SQLCHAR *)"select * from EmployeeTStamp1", SQL_NTS);
 
 						retcode = SQLExecDirect(hstmt,
-							(SQLCHAR *)"select * from EmployeeTStamp1",
+							(SQLCHAR *)"select * from DingStaffInfo A inner join DingStaffInfo B on A.SupEID = B.EID where B.shortID = 'wfan'",
 							SQL_NTS);
 						if (retcode == SQL_SUCCESS) {
 							while (TRUE) {
@@ -166,6 +213,14 @@ extern "C"
 			SQLFreeHandle(SQL_HANDLE_ENV, henv);
 		}
 		return returnVal;
+	}
+
+	double __stdcall addone(double &a, double &b, int &c)
+	{
+		a++;
+		b++;
+		c++;
+		return a + b+c;
 	}
 
 }

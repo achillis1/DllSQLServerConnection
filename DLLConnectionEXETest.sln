@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DLLConnectionEXETest", "DLL
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DLLConnectionDLLTest", "DLLConnectionDLLTest\DLLConnectionDLLTest.vcxproj", "{147DA091-0CCE-48F3-836E-18D740F6BFC3}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NexantSafetyDLL", "NexantSafetyDLL\NexantSafetyDLL.vcxproj", "{5C38F826-AD6F-4D34-9C5E-CF61F839B601}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -21,6 +23,10 @@ Global
 		{147DA091-0CCE-48F3-836E-18D740F6BFC3}.Debug|Win32.Build.0 = Debug|Win32
 		{147DA091-0CCE-48F3-836E-18D740F6BFC3}.Release|Win32.ActiveCfg = Release|Win32
 		{147DA091-0CCE-48F3-836E-18D740F6BFC3}.Release|Win32.Build.0 = Release|Win32
+		{5C38F826-AD6F-4D34-9C5E-CF61F839B601}.Debug|Win32.ActiveCfg = Debug|Win32
+		{5C38F826-AD6F-4D34-9C5E-CF61F839B601}.Debug|Win32.Build.0 = Debug|Win32
+		{5C38F826-AD6F-4D34-9C5E-CF61F839B601}.Release|Win32.ActiveCfg = Release|Win32
+		{5C38F826-AD6F-4D34-9C5E-CF61F839B601}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

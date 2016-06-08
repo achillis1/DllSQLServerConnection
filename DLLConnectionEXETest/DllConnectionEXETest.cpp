@@ -9,8 +9,21 @@
 //	}
 
 	//int _stdcall myGetSQL(){
+
+//int addition(int a, int b)
+//{
+//	int r;
+//	r = a + b;
+//	return r;
+//}
+
+
 	int main(){
 		int returnVal;
+		int returnstaffinfo;
+		char strSelect[1000];
+		char empName[] = "wfan";
+
 		SQLHENV henv;
 		SQLHDBC hdbc;
 		SQLHSTMT hstmt;
@@ -26,9 +39,10 @@
 
 		char firstname[VARCHARLEN], lastname[VARCHARLEN], shortid[VARCHARLEN],eid[VARCHARLEN], supeid[VARCHARLEN];
 		SQLINTEGER cbFirstName, cbLastName, cbShortID, cbEID, cbSupEID;
-		//SQLINTEGER eid, cbEID;
-		//SQLBIGINT supeid, cbSupEID;
-		
+
+		char rolename[VARCHARLEN], role[VARCHARLEN];
+		SQLINTEGER cbRolename, cbRole;
+
 
 		HWND desktopHandle = GetDesktopWindow();   // desktop's window handle
 
@@ -39,6 +53,7 @@
 		systeminfo systable[1];
 
 		staffinfo mystaffinfo[AS];
+		staffroles mystaffrole[AS];
 
 		returnVal = 0;
 		// Allocate environment handle
@@ -97,14 +112,23 @@
 					//	SQL_DRIVER_NOPROMPT);
 					// Allocate statement handle
 					if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+
 						retcode = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
 
-						//long fred;
-						//fred = SQLExecDirect(hstmt, (SQLCHAR *)"select * from EmployeeTStamp1", SQL_NTS);
+						//retcode = SQLExecDirect(hstmt,
+						//	(SQLCHAR *)"select * from StaffInfo",
+						//	SQL_NTS);
 
+//						retcode = SQLExecDirect(hstmt,
+//(SQLCHAR *)"select * from ProgramAuthorizations A inner join EmployeeAuthorizations B on A.AuthID = B.AuthID inner join DingStaffInfo C on A.ProgramManager = C.OfficialName where A.pCheck='OK' and A.pStatus='ACTIVE' and B.ShortID='wfan' and C.ShortID='wfan'",
+//							SQL_NTS);
+						strcpy(strSelect, "select * from DingStaffInfo A inner join DingStaffInfo B on A.SupEID = B.EID where B.shortID = '");
+						strcat(strSelect, empName);
+						strcat(strSelect, "'");
 						retcode = SQLExecDirect(hstmt,
-							(SQLCHAR *)"select * from StaffInfo",
+							(SQLCHAR *)strSelect,
 							SQL_NTS);
+
 						if (retcode == SQL_SUCCESS) {
 							while (TRUE) {
 								retcode = SQLFetch(hstmt);
@@ -113,30 +137,11 @@
 								}
 								if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO){
 
-									//table *tmpemployee = (struct table*)malloc(sizeof(struct table));
-
-									//SQLGetData(hstmt, 1, SQL_C_ULONG, &sCustID, 0, &cbCustID);
-									//SQLGetData(hstmt, 2, SQL_C_CHAR, szName, NAME_LEN, &cbName);
-									//SQLGetData(hstmt, 3, SQL_C_CHAR, szPhone, PHONE_LEN, &cbPhone);
-									//SQLGetData(hstmt, 4, SQL_C_DOUBLE, &cSalary, 0, &cbSalary);
-
-
 									SQLGetData(hstmt, 1, SQL_C_CHAR, firstname, VARCHARLEN, &cbFirstName);
 									SQLGetData(hstmt, 2, SQL_C_CHAR, lastname, VARCHARLEN, &cbLastName);
 									SQLGetData(hstmt, 3, SQL_C_CHAR, eid, VARCHARLEN, &cbEID);
 									SQLGetData(hstmt, 4, SQL_C_CHAR, shortid, VARCHARLEN, &cbShortID);
 									SQLGetData(hstmt, 5, SQL_C_CHAR, supeid, VARCHARLEN, &cbSupEID);
-
-									//employee[nLength].EmployeeNumber = sCustID;
-									//strcpy_s(employee[nLength].FirstName, szName);
-									//strcpy_s(employee[nLength].LastName, szPhone);
-									//employee[nLength].hourlySalary = cSalary;
-
-									//strcpy_s(mystaffinfo[nLength].FirstName ,firstname);
-									//strcpy_s(mystaffinfo[nLength].LastName, lastname);
-									//strcpy_s(mystaffinfo[nLength].EID, eid);
-									//strcpy_s(mystaffinfo[nLength].ShortID, shortid);
-									//strcpy_s(mystaffinfo[nLength].SupEID, supeid);
 
 									memcpy(mystaffinfo[nLength].FirstName, firstname, sizeof(firstname));
 									memcpy(mystaffinfo[nLength].LastName, lastname, sizeof(lastname));
@@ -147,8 +152,7 @@
 
 									nLength++;
 
-									//printf("%4d, %9d, %s, %s\n", nLength, sCustID, szName, szPhone);
-									printf("%16s, %16s,%8d,%16s, %8d\n", firstname, lastname, eid, shortid, supeid);
+									printf("%16s, %16s,%8s,%16s, %8s\n", firstname, lastname, eid, shortid, supeid);
 
 								}
 								else {
@@ -157,13 +161,53 @@
 							}
 						}
 
+
+						// another sql query
+						nLength = 0;
+						retcode = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
+						retcode = SQLExecDirect(hstmt,
+							(SQLCHAR *)"select * from StaffRoles",
+							SQL_NTS);
+						if (retcode == SQL_SUCCESS) {
+							while (TRUE) {
+								retcode = SQLFetch(hstmt);
+								if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO) {
+									printf("Error!\n");
+								}
+								if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO){
+
+									SQLGetData(hstmt, 1, SQL_C_CHAR, firstname, VARCHARLEN, &cbFirstName);
+									SQLGetData(hstmt, 2, SQL_C_CHAR, lastname, VARCHARLEN, &cbLastName);
+									SQLGetData(hstmt, 3, SQL_C_CHAR, shortid, VARCHARLEN, &cbShortID);
+									SQLGetData(hstmt, 4, SQL_C_CHAR, rolename, VARCHARLEN, &cbRolename);
+									SQLGetData(hstmt, 5, SQL_C_CHAR, role, VARCHARLEN, &cbRole);
+
+									memcpy(mystaffrole[nLength].FirstName, firstname, sizeof(firstname));
+									memcpy(mystaffrole[nLength].LastName, lastname, sizeof(lastname));
+									memcpy(mystaffrole[nLength].ShortID, shortid, sizeof(shortid));
+									memcpy(mystaffrole[nLength].RoleName, rolename, sizeof(rolename));
+									memcpy(mystaffrole[nLength].Role, role, sizeof(role));
+
+									nLength++;
+
+									printf("%16s, %16s,%8s,%16s, %8s\n", firstname, lastname, shortid, rolename, role);
+
+								}
+								else {
+									break;
+								}
+							}
+						}
+
+						// add more query 
+
+
 						// Process data
 						if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
 							SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
 						}
 
 						returnVal = nLength;
-						//printf("%d", returnVal);
 						SQLDisconnect(hdbc);
 					}
 
