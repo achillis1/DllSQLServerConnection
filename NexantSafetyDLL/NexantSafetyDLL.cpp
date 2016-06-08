@@ -2,7 +2,7 @@
 
 extern "C"
 {
-	int _stdcall myGetSQL(dingstaffinfo myinfo[], dingstaffinfo mystaffinfo[], int nLength, LPCSTR pszString){
+	int _stdcall myGetSQL(dingstaffinfo myinfo[], dingstaffinfo mystaffinfo[], int nLength, LPCSTR pszString, systeminfo systable[]){
 		int returnVal;
 		char strSelect[1000];
 
@@ -15,7 +15,7 @@ extern "C"
 		SQLSMALLINT OutConnStrLen;
 
 		SQLINTEGER cbOfficialName, cbShortID, cbEID, cbSupEID;
-
+		SQLINTEGER cbUpdatedBy, cbEmployeeDashBoard, cbSiteVisitProgramAuthForm, cbStaffCensus, cbProjectListEE, cbProjectListNPE, cbVividTrainingCompletions, cbVividTrainingUsers, cbStaffTracker, cbSafetyDatabase, cbTrainingTracker;
 		//char rolename[VARCHARLEN], role[VARCHARLEN];
 		//SQLINTEGER cbRolename, cbRole;
 
@@ -55,7 +55,8 @@ extern "C"
 					if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
 						retcode = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
 
-						// 1st sql query
+						// 1st sql query start
+						nLength = 0;
 						strcpy_s(strSelect, "select * from DingStaffInfo where shortID = '");
 						strcat_s(strSelect, pszString);
 						strcat_s(strSelect, "'");
@@ -72,6 +73,7 @@ extern "C"
 									SQLGetData(hstmt, 2, SQL_C_CHAR, myinfo[nLength].ShortID, VARCHARLEN, &cbShortID);
 									SQLGetData(hstmt, 3, SQL_C_CHAR, myinfo[nLength].EID, VARCHARLEN, &cbEID);
 									SQLGetData(hstmt, 4, SQL_C_CHAR, myinfo[nLength].SupEID, VARCHARLEN, &cbSupEID);
+									nLength++;
 								}
 								else {
 									break;
@@ -79,12 +81,53 @@ extern "C"
 							}
 						}
 						
-						// Process data
+						if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+							SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+						}
+						// 1st sql query end
+
+						//2nd sql query start
+						nLength = 0;
+						retcode = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
+						strcpy_s(strSelect, "select * from SystemInfo");
+
+						retcode = SQLExecDirect(hstmt,
+							(SQLCHAR *)strSelect,
+							SQL_NTS);
+						if (retcode == SQL_SUCCESS) {
+							while (TRUE) {
+								retcode = SQLFetch(hstmt);
+
+								if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO){
+
+									SQLGetData(hstmt, 1, SQL_C_CHAR, systable[nLength].UpdatedBy, VARCHARLEN, &cbUpdatedBy);
+									SQLGetData(hstmt, 2, SQL_C_CHAR, systable[nLength].EmployeeDashBoard, VARCHARLEN, &cbEmployeeDashBoard);
+									SQLGetData(hstmt, 3, SQL_C_CHAR, systable[nLength].SiteVisitProgramAuthForm, VARCHARLEN, &cbSiteVisitProgramAuthForm);
+									SQLGetData(hstmt, 4, SQL_C_CHAR, systable[nLength].StaffCensus, VARCHARLEN, &cbStaffCensus);
+									SQLGetData(hstmt, 5, SQL_C_CHAR, systable[nLength].ProjectListEE, VARCHARLEN, &cbProjectListEE);
+									SQLGetData(hstmt, 6, SQL_C_CHAR, systable[nLength].ProjectListNPE, VARCHARLEN, &cbProjectListNPE);
+									SQLGetData(hstmt, 7, SQL_C_CHAR, systable[nLength].VividTrainingCompletions, VARCHARLEN, &cbVividTrainingCompletions);
+									SQLGetData(hstmt, 8, SQL_C_CHAR, systable[nLength].VividTrainingUsers, VARCHARLEN, &cbVividTrainingUsers);
+									SQLGetData(hstmt, 9, SQL_C_CHAR, systable[nLength].StaffTracker, VARCHARLEN, &cbStaffTracker);
+									SQLGetData(hstmt, 10, SQL_C_CHAR, systable[nLength].SafetyDatabase, VARCHARLEN, &cbSafetyDatabase);
+									SQLGetData(hstmt, 11, SQL_C_CHAR, systable[nLength].TrainingTracker, VARCHARLEN, &cbTrainingTracker);
+									nLength++;
+								}
+								else {
+									break;
+								}
+							}
+						}
+
 						if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
 							SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
 						}
 
-						//2nd sql query
+						returnVal = nLength;
+						//2nd sql query end
+
+						//3rd sql query start
+						nLength = 0;
 						retcode = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
 						strcpy_s(strSelect, "select * from DingStaffInfo A inner join DingStaffInfo B on A.SupEID = B.EID where B.shortID = '");
 						strcat_s(strSelect, pszString);
@@ -112,13 +155,16 @@ extern "C"
 							}
 						}
 
-						// Process data
 						if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
 							SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
 						}
-
+						
 						returnVal = nLength;
-						//printf("%d", returnVal);
+						//3rd sql query end
+
+						
+
+
 						SQLDisconnect(hdbc);
 					}
 
