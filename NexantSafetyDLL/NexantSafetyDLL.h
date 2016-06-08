@@ -51,6 +51,17 @@ struct staffinfo
 };
 #endif
 
+#ifndef DINGSTAFFINFO_H
+#define DINGSTAFFINFO_H
+struct dingstaffinfo
+{
+	char OfficialName[VARCHARLEN];
+	char ShortID[VARCHARLEN];
+	char EID[VARCHARLEN];
+	char SupEID[VARCHARLEN];
+};
+#endif
+
 #ifndef STAFFROLES_H
 #define STAFFROLES_H
 struct staffroles

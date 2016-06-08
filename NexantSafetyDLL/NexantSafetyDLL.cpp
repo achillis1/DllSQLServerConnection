@@ -2,7 +2,7 @@
 
 extern "C"
 {
-	int _stdcall myGetSQL(staffinfo mystaffinfo[], int nLength, LPCSTR pszString){
+	int _stdcall myGetSQL(dingstaffinfo myinfo[], dingstaffinfo mystaffinfo[], int nLength, LPCSTR pszString){
 		int returnVal;
 		char strSelect[1000];
 
@@ -14,20 +14,17 @@ extern "C"
 		SQLCHAR OutConnStr[255];
 		SQLSMALLINT OutConnStrLen;
 
-		char firstname[VARCHARLEN], lastname[VARCHARLEN], shortid[VARCHARLEN], eid[VARCHARLEN], supeid[VARCHARLEN];
-		SQLINTEGER cbFirstName, cbLastName, cbShortID, cbEID, cbSupEID;
+		SQLINTEGER cbOfficialName, cbShortID, cbEID, cbSupEID;
 
-		char rolename[VARCHARLEN], role[VARCHARLEN];
-		SQLINTEGER cbRolename, cbRole;
+		//char rolename[VARCHARLEN], role[VARCHARLEN];
+		//SQLINTEGER cbRolename, cbRole;
 
 		HWND desktopHandle = GetDesktopWindow();   // desktop's window handle
 
 		nLength = 0;
 
-		systeminfo systable[1];
-
-		//staffinfo mystaffinfo[AS];
-		staffroles mystaffrole[AS];
+		//systeminfo systable[1];
+		//staffroles mystaffrole[AS];
 
 		returnVal = 0;
 		// Allocate environment handle
@@ -58,9 +55,10 @@ extern "C"
 					if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
 						retcode = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
 
-						strcpy(strSelect, "select * from DingStaffInfo A inner join DingStaffInfo B on A.SupEID = B.EID where B.shortID = '");
-						strcat(strSelect, pszString);
-						strcat(strSelect, "'");
+						// 1st sql query
+						strcpy_s(strSelect, "select * from DingStaffInfo where shortID = '");
+						strcat_s(strSelect, pszString);
+						strcat_s(strSelect, "'");
 
 						retcode = SQLExecDirect(hstmt,
 							(SQLCHAR *)strSelect,
@@ -68,16 +66,43 @@ extern "C"
 						if (retcode == SQL_SUCCESS) {
 							while (TRUE) {
 								retcode = SQLFetch(hstmt);
-								if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO) {
-									printf("Error!\n");
+
+								if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO){
+									SQLGetData(hstmt, 1, SQL_C_CHAR, myinfo[nLength].OfficialName, VARCHARLEN, &cbOfficialName);
+									SQLGetData(hstmt, 2, SQL_C_CHAR, myinfo[nLength].ShortID, VARCHARLEN, &cbShortID);
+									SQLGetData(hstmt, 3, SQL_C_CHAR, myinfo[nLength].EID, VARCHARLEN, &cbEID);
+									SQLGetData(hstmt, 4, SQL_C_CHAR, myinfo[nLength].SupEID, VARCHARLEN, &cbSupEID);
 								}
+								else {
+									break;
+								}
+							}
+						}
+						
+						// Process data
+						if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
+							SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+						}
+
+						//2nd sql query
+						retcode = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
+						strcpy_s(strSelect, "select * from DingStaffInfo A inner join DingStaffInfo B on A.SupEID = B.EID where B.shortID = '");
+						strcat_s(strSelect, pszString);
+						strcat_s(strSelect, "'");
+
+						retcode = SQLExecDirect(hstmt,
+							(SQLCHAR *)strSelect,
+							SQL_NTS);
+						if (retcode == SQL_SUCCESS) {
+							while (TRUE) {
+								retcode = SQLFetch(hstmt);
+
 								if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO){
 									
-									SQLGetData(hstmt, 1, SQL_C_CHAR, mystaffinfo[nLength].FirstName, VARCHARLEN, &cbFirstName);
-									SQLGetData(hstmt, 2, SQL_C_CHAR, mystaffinfo[nLength].LastName, VARCHARLEN, &cbLastName);
+									SQLGetData(hstmt, 1, SQL_C_CHAR, mystaffinfo[nLength].OfficialName, VARCHARLEN, &cbOfficialName);
+									SQLGetData(hstmt, 2, SQL_C_CHAR, mystaffinfo[nLength].ShortID, VARCHARLEN, &cbShortID);
 									SQLGetData(hstmt, 3, SQL_C_CHAR, mystaffinfo[nLength].EID, VARCHARLEN, &cbEID);
-									SQLGetData(hstmt, 4, SQL_C_CHAR, mystaffinfo[nLength].ShortID, VARCHARLEN, &cbShortID);
-									SQLGetData(hstmt, 5, SQL_C_CHAR, mystaffinfo[nLength].SupEID, VARCHARLEN, &cbSupEID);
+									SQLGetData(hstmt, 4, SQL_C_CHAR, mystaffinfo[nLength].SupEID, VARCHARLEN, &cbSupEID);
 
 									nLength++;
 								}
